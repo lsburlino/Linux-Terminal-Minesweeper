@@ -21,7 +21,7 @@
 int play_game(char* f_name){
     game* board = load_board(f_name);
     if(board == NULL){
-        fprintf(stderr, "ERROR: Cound not allocate board or read from file");
+        fprintf(stderr, "ERROR: Cound not allocate board or read from file\n");
         return EXIT_FAILURE;
     }
     int ret, r, c, m = 0;
@@ -39,10 +39,10 @@ int play_game(char* f_name){
             else
                 printf("YOU LOST -- GAME OVER -- mines mis-identified\n");    
             break;
-        }else if(r<1 || c<1 || r > board->row_max-1 || c > board->col_max-1 || m < 0 || m > 1)
+        }else if(r<1 || c<1 || r > board->row_max || c > board->col_max || m < 0 || m > 1)
             printf("Illegal move or click type, try again!\n");
         else{
-            ret = process_click(board, r, c, m);
+            ret = process_click(board, --r, --c, m);
             if (ret == 0){
                 printf("GAME OVER, you stepped on a mine or marked it as a mine\n");
                 break;
@@ -87,7 +87,7 @@ int process_click(game* gme, int row, int col, int click){
   //otherwise uncovers cell and calls uncover if mine = 0
   if(gme->cells[row][col].color==gray){
     if (gme->cells[row][col].mine<0){
-      return 0; //doesn't work ask
+      return 0;
     }
     
     if (gme->cells[row][col].mine>0){
@@ -100,15 +100,16 @@ int process_click(game* gme, int row, int col, int click){
 }
 
 int uncover(game* gme, int row, int col){
-  printf(":)\n");
-  //break recursion
+
+  //break recursion if out of bounds or if already uncovered or flagged
   if (row<0 || col<0 || row>gme->row_max-1 || col>gme->col_max-1) return 1;
   if (gme->cells[row][col].color != gray) return 1;
 
-  
+  //uncovers cell and checks if next to a bomb
   gme->cells[row][col].color = white;
   if (gme->cells[row][col].mine>0) return 1;
 
+  //calls function on all squares around
   uncover(gme, row+1,col+1);
   uncover(gme, row+1,col);
   uncover(gme, row+1,col-1);
@@ -122,7 +123,9 @@ int uncover(game* gme, int row, int col){
 }
 
 int check_game(game* gme){
-
+  //checks if the game is won
+  //only bombs are left grey or black
+  //nothing else is gray or black
   int r, c;
   for (r=0;r<gme->row_max;r++){
     for (c=0;c<gme->col_max;c++){

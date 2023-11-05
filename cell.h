@@ -2,7 +2,7 @@
 #define CELL_H
 
 // game board's cell colors
-typedef enum {gray, white, black, red} colors;
+typedef enum {gray, white, black} colors;
 // game board's cell mine, otherwise number of mines in surrounding cells
 typedef enum {yes=-1, no=0} mines;
 
